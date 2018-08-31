@@ -190,4 +190,22 @@ describe('ALE', () => {
                 assert.equal(result[1].debit, 500);
             });
     });
+
+    it('should return newest transactions first when requested'), () => {
+        return bookZAR.getTransactions({account: ['Assets', 'Income']})
+            .then((result) => {
+                const dates = result.map(t => new Date(t.timestamp));
+                assert(dates[0] < dates[1]);
+            })
+            .then(() => {
+                return bookZAR.getTransactions({
+                    account: ['Assets', 'Income'],
+                    newestFirst: true
+                });
+            })
+            .then(() => {
+                const dates = result.map(t => new Date(t.timestamp));
+                assert(dates[0] > dates[1]);
+            });
+    }
 });
