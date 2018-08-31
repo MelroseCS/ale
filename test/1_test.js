@@ -191,21 +191,14 @@ describe('ALE', () => {
             });
     });
 
-    it('should return newest transactions first when requested'), () => {
-        return bookZAR.getTransactions({account: ['Assets', 'Income']})
-            .then((result) => {
-                const dates = result.map(t => new Date(t.timestamp));
-                assert(dates[0] < dates[1]);
+    it('should return newest transactions first when requested', () => {
+        return bookZAR.getJournalEntries()
+            .then((res) => {
+                assert(new Date(res[0].timestamp) < new Date(res[1].timestamp));
             })
-            .then(() => {
-                return bookZAR.getTransactions({
-                    account: ['Assets', 'Income'],
-                    newestFirst: true
-                });
-            })
-            .then(() => {
-                const dates = result.map(t => new Date(t.timestamp));
-                assert(dates[0] > dates[1]);
+            .then(() => bookZAR.getJournalEntries({newestFirst: true}))
+            .then((res) => {
+                assert(new Date(res[0].timestamp) > new Date(res[1].timestamp));
             });
-    }
+    })
 });
