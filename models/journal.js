@@ -20,38 +20,32 @@ const {AleError, codes} = require('../lib/errors');
 /**
  * A journal entry comprises a set of transactions, which have a balance set of debit and credit entries
  */
-const JournalEntry = sequelize.define('journal', {
-        memo: {type: Sequelize.TEXT, defaultValue: ''},
-        timestamp: {type: Sequelize.DATE, validate: {isDate: true}, defaultValue: Date.now},
-        voided: {type: Sequelize.BOOLEAN, defaultValue: false},
-        voidReason: Sequelize.STRING
-    }, {
-        name: {
-            singular: 'JournalEntry',
-            plural: 'JournalEntries'
-        }
-    }
-);
+const attributes = {
+    memo: {type: Sequelize.TEXT, defaultValue: ''},
+    timestamp: {type: Sequelize.DATE, validate: {isDate: true}, defaultValue: Date.now},
+    voided: {type: Sequelize.BOOLEAN, defaultValue: false},
+    voidReason: Sequelize.STRING
+};
+
+const name = {
+    singular: 'JournalEntry',
+    plural: 'JournalEntries'
+};
+
+const JournalEntry = sequelize.define('journal', attributes, { name });
 
 Transaction.JournalEntry = Transaction.belongsTo(JournalEntry, {foreignKey: {allowNull: false}, onDelete: 'CASCADE'});
 JournalEntry.hasOne(JournalEntry, {as: 'Original'});
 JournalEntry.hasMany(Transaction, {foreignKey: {allowNull: false}, onDelete: 'CASCADE'});
 
-JournalEntry.addMeta = function(meta) {
-    JournalEntry = sequelize.define('journal', {
-        memo: {type: Sequelize.TEXT, defaultValue: ''},
-        timestamp: {type: Sequelize.DATE, validate: {isDate: true}, defaultValue: Date.now},
-        voided: {type: Sequelize.BOOLEAN, defaultValue: false},
-        voidReason: Sequelize.STRING,
-        bingo: {type: Sequelize.TEXT, defaultValue: ''}
-        //...meta
-    }, {
-        name: {
-            singular: 'JournalEntry',
-            plural: 'JournalEntries'
-        }
-    });
-}
+/**
+ * Call this before the initial JournalEntry (or sequelize) sync() to set additional
+ * top level metadata fields to use in JournalEntry queries. 
+ * @param query an object of valid model attributes to be merged with the default attributes
+ */
+JournalEntry.redefineWithMeta = function(meta) {
+    JournalEntry.init({...attributes, ...meta}, { sequelize, name });
+};
 
 JournalEntry.prototype.values = function() {
     return {
