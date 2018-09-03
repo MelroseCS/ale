@@ -37,6 +37,22 @@ Transaction.JournalEntry = Transaction.belongsTo(JournalEntry, {foreignKey: {all
 JournalEntry.hasOne(JournalEntry, {as: 'Original'});
 JournalEntry.hasMany(Transaction, {foreignKey: {allowNull: false}, onDelete: 'CASCADE'});
 
+JournalEntry.addMeta = function(meta) {
+    JournalEntry = sequelize.define('journal', {
+        memo: {type: Sequelize.TEXT, defaultValue: ''},
+        timestamp: {type: Sequelize.DATE, validate: {isDate: true}, defaultValue: Date.now},
+        voided: {type: Sequelize.BOOLEAN, defaultValue: false},
+        voidReason: Sequelize.STRING,
+        bingo: {type: Sequelize.TEXT, defaultValue: ''}
+        //...meta
+    }, {
+        name: {
+            singular: 'JournalEntry',
+            plural: 'JournalEntries'
+        }
+    });
+}
+
 JournalEntry.prototype.values = function() {
     return {
         id: this.getDataValue('id'),
